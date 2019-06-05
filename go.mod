@@ -17,7 +17,6 @@ require (
 	github.com/onsi/gomega v1.5.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pquerna/cachecontrol v0.0.0-20171018203845-0dec1b30a021 // indirect
-	github.com/pusher/oauth2_proxy v3.2.0+incompatible
 	github.com/stretchr/testify v1.1.4
 	github.com/yhat/wsutil v0.0.0-20170731153501-1d66fa95c997
 	golang.org/x/crypto v0.0.0-20171113213409-9f005a07e0d3
