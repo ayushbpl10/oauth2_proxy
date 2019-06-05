@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/cookie"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
 )
 
 // Redeem provides a default implementation of the OAuth2 token redemption process

@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"crypto/sha1"
@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 

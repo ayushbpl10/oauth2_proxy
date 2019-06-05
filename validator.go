@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"encoding/csv"
@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
 // UserMap holds information from the authenticated emails file

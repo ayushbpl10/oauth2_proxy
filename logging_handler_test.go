@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
 func TestLoggingHandler_ServeHTTP(t *testing.T) {

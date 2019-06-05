@@ -2,7 +2,7 @@
 
 // Turns out you can't copy over an existing file on Windows.
 
-package main
+package proxy
 
 import (
 	"io/ioutil"

@@ -12,13 +12,13 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pusher/oauth2_proxy/cookie"
-	"github.com/pusher/oauth2_proxy/pkg/apis/options"
-	sessionsapi "github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/pkg/cookies"
-	"github.com/pusher/oauth2_proxy/pkg/sessions"
-	sessionscookie "github.com/pusher/oauth2_proxy/pkg/sessions/cookie"
-	"github.com/pusher/oauth2_proxy/pkg/sessions/utils"
+	"github.com/ayushbpl10/oauth2_proxy/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/options"
+	sessionsapi "github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/cookies"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/sessions"
+	sessionscookie "github.com/ayushbpl10/oauth2_proxy/pkg/sessions/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/sessions/utils"
 )
 
 func TestSessionStore(t *testing.T) {

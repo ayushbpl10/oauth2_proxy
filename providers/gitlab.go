@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pusher/oauth2_proxy/api"
-	"github.com/pusher/oauth2_proxy/logger"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/api"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
 )
 
 // GitLabProvider represents an GitLab based Identity Provider

@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"crypto"
@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/mbland/hmacauth"
-	"github.com/pusher/oauth2_proxy/logger"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/pkg/sessions/cookie"
-	"github.com/pusher/oauth2_proxy/providers"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/sessions/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/providers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/websocket"

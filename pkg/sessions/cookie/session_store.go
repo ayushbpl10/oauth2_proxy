@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/cookie"
-	"github.com/pusher/oauth2_proxy/pkg/apis/options"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/pkg/cookies"
-	"github.com/pusher/oauth2_proxy/pkg/sessions/utils"
+	"github.com/ayushbpl10/oauth2_proxy/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/options"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/cookies"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/sessions/utils"
 )
 
 const (

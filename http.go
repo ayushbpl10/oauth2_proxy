@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"crypto/tls"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
 // Server represents an HTTP server

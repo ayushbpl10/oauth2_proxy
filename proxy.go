@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"flag"
@@ -12,10 +12,10 @@ import (
 
 	"github.com/BurntSushi/toml"
 	options "github.com/mreiferson/go-options"
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
-func main() {
+func Proxy() *Server {
 	logger.SetFlags(logger.Lshortfile)
 	flagSet := flag.NewFlagSet("oauth2_proxy", flag.ExitOnError)
 
@@ -169,5 +169,6 @@ func main() {
 		Handler: handler,
 		Opts:    opts,
 	}
-	s.ListenAndServe()
+	//s.ListenAndServe()
+	return s
 }

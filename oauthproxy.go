@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	b64 "encoding/base64"
@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/mbland/hmacauth"
-	"github.com/pusher/oauth2_proxy/cookie"
-	"github.com/pusher/oauth2_proxy/logger"
-	sessionsapi "github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/providers"
+	"github.com/ayushbpl10/oauth2_proxy/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
+	sessionsapi "github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/providers"
 	"github.com/yhat/wsutil"
 )
 

@@ -1,13 +1,13 @@
 // +build go1.3,!plan9,!solaris
 
-package main
+package proxy
 
 import (
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 	fsnotify "gopkg.in/fsnotify/fsnotify.v1"
 )
 

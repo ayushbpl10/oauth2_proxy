@@ -1,7 +1,7 @@
 // largely adapted from https://github.com/gorilla/handlers/blob/master/handlers.go
 // to add logging of request duration as last value (and drop referrer)
 
-package main
+package proxy
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
 // responseLogger is wrapper of http.ResponseWriter that keeps track of its HTTP status

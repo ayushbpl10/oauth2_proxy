@@ -3,9 +3,9 @@ package sessions
 import (
 	"fmt"
 
-	"github.com/pusher/oauth2_proxy/pkg/apis/options"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/pkg/sessions/cookie"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/options"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/sessions/cookie"
 )
 
 // NewSessionStore creates a SessionStore from the provided configuration

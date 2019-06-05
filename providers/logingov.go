@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
+	"github.com/ayushbpl10/oauth2_proxy/pkg/apis/sessions"
 	"gopkg.in/square/go-jose.v2"
 )
 

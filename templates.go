@@ -1,10 +1,10 @@
-package main
+package proxy
 
 import (
 	"html/template"
 	"path"
 
-	"github.com/pusher/oauth2_proxy/logger"
+	"github.com/ayushbpl10/oauth2_proxy/logger"
 )
 
 func loadTemplates(dir string) *template.Template {

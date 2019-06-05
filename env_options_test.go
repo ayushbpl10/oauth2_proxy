@@ -1,10 +1,10 @@
-package main_test
+package proxy_test
 
 import (
 	"os"
 	"testing"
 
-	proxy "github.com/pusher/oauth2_proxy"
+	proxy "github.com/ayushbpl10/oauth2_proxy"
 	"github.com/stretchr/testify/assert"
 )
 
