@@ -6,13 +6,12 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
-	options "github.com/mreiferson/go-options"
 	"github.com/ayushbpl10/oauth2_proxy/logger"
+	"github.com/mreiferson/go-options"
 )
 
 func Proxy() *Server {
@@ -26,7 +25,7 @@ func Proxy() *Server {
 	googleGroups := StringArray{}
 
 	config := flagSet.String("config", "", "path to config file")
-	showVersion := flagSet.Bool("version", false, "print version string")
+	//showVersion := flagSet.Bool("version", false, "print version string")
 
 	flagSet.String("http-address", "127.0.0.1:4180", "[http://]<addr>:<port> or unix://<path> to listen on for HTTP clients")
 	flagSet.String("https-address", ":443", "<addr>:<port> to listen on for HTTPS clients")
@@ -114,10 +113,10 @@ func Proxy() *Server {
 
 	flagSet.Parse(os.Args[1:])
 
-	if *showVersion {
-		fmt.Printf("oauth2_proxy %s (built with %s)\n", VERSION, runtime.Version())
-		return
-	}
+	//if *showVersion {
+	//	fmt.Printf("oauth2_proxy %s (built with %s)\n", VERSION, runtime.Version())
+	//	return
+	//}
 
 	opts := NewOptions()
 
