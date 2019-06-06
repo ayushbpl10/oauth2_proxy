@@ -20,23 +20,28 @@ type Provider interface {
 }
 
 // New provides a new Provider based on the configured provider string
-func New(provider string, p *ProviderData) Provider {
-	switch provider {
+func New(p ProviderInput) Provider {
+	switch p.ProviderName {
 	case "linkedin":
-		return NewLinkedInProvider(p)
+		return NewLinkedInProvider(p.P)
 	case "facebook":
-		return NewFacebookProvider(p)
+		return NewFacebookProvider(p.P)
 	case "github":
-		return NewGitHubProvider(p)
+		return NewGitHubProvider(p.P)
 	case "azure":
-		return NewAzureProvider(p)
+		return NewAzureProvider(p.P)
 	case "gitlab":
-		return NewGitLabProvider(p)
+		return NewGitLabProvider(p.P)
 	case "oidc":
-		return NewOIDCProvider(p)
+		return NewOIDCProvider(p.P)
 	case "login.gov":
-		return NewLoginGovProvider(p)
+		return NewLoginGovProvider(p.P)
 	default:
-		return NewGoogleProvider(p)
+		return NewGoogleProvider(p.P)
 	}
+}
+
+type ProviderInput struct {
+	ProviderName string
+	P *ProviderData
 }

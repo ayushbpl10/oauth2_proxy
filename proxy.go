@@ -168,6 +168,6 @@ func Proxy() *Server {
 		Handler: handler,
 		Opts:    opts,
 	}
-	//s.ListenAndServe()
+	s.ListenAndServe()
 	return s
 }

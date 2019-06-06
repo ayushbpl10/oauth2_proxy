@@ -26,6 +26,23 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+type Client struct {
+	ClientID        string
+	ClientSecret    string
+	// These options allow for other providers besides Google, with
+	// potential overrides.
+	Provider          string `flag:"provider" cfg:"provider" env:"OAUTH2_PROXY_PROVIDER"`
+	OIDCIssuerURL     string `flag:"oidc-issuer-url" cfg:"oidc_issuer_url" env:"OAUTH2_PROXY_OIDC_ISSUER_URL"`
+	SkipOIDCDiscovery bool   `flag:"skip-oidc-discovery" cfg:"skip_oidc_discovery" env:"OAUTH2_SKIP_OIDC_DISCOVERY"`
+	OIDCJwksURL       string `flag:"oidc-jwks-url" cfg:"oidc_jwks_url" env:"OAUTH2_OIDC_JWKS_URL"`
+	LoginURL          string `flag:"login-url" cfg:"login_url" env:"OAUTH2_PROXY_LOGIN_URL"`
+	RedeemURL         string `flag:"redeem-url" cfg:"redeem_url" env:"OAUTH2_PROXY_REDEEM_URL"`
+	ProfileURL        string `flag:"profile-url" cfg:"profile_url" env:"OAUTH2_PROXY_PROFILE_URL"`
+	ProtectedResource string `flag:"resource" cfg:"resource" env:"OAUTH2_PROXY_RESOURCE"`
+	ValidateURL       string `flag:"validate-url" cfg:"validate_url" env:"OAUTH2_PROXY_VALIDATE_URL"`
+	Scope             string `flag:"scope" cfg:"scope" env:"OAUTH2_PROXY_SCOPE"`
+}
+
 // Options holds Configuration Options that can be set by Command Line Flag,
 // or Config File
 type Options struct {
@@ -34,8 +51,6 @@ type Options struct {
 	HTTPAddress     string `flag:"http-address" cfg:"http_address" env:"OAUTH2_PROXY_HTTP_ADDRESS"`
 	HTTPSAddress    string `flag:"https-address" cfg:"https_address" env:"OAUTH2_PROXY_HTTPS_ADDRESS"`
 	RedirectURL     string `flag:"redirect-url" cfg:"redirect_url" env:"OAUTH2_PROXY_REDIRECT_URL"`
-	ClientID        string `flag:"client-id" cfg:"client_id" env:"OAUTH2_PROXY_CLIENT_ID"`
-	ClientSecret    string `flag:"client-secret" cfg:"client_secret" env:"OAUTH2_PROXY_CLIENT_SECRET"`
 	TLSCertFile     string `flag:"tls-cert" cfg:"tls_cert_file" env:"OAUTH2_PROXY_TLS_CERT_FILE"`
 	TLSKeyFile      string `flag:"tls-key" cfg:"tls_key_file" env:"OAUTH2_PROXY_TLS_KEY_FILE"`
 
@@ -74,18 +89,10 @@ type Options struct {
 	SkipAuthPreflight     bool          `flag:"skip-auth-preflight" cfg:"skip_auth_preflight" env:"OAUTH2_PROXY_SKIP_AUTH_PREFLIGHT"`
 	FlushInterval         time.Duration `flag:"flush-interval" cfg:"flush_interval" env:"OAUTH2_PROXY_FLUSH_INTERVAL"`
 
+	Clients				  []Client
 	// These options allow for other providers besides Google, with
 	// potential overrides.
-	Provider          string `flag:"provider" cfg:"provider" env:"OAUTH2_PROXY_PROVIDER"`
-	OIDCIssuerURL     string `flag:"oidc-issuer-url" cfg:"oidc_issuer_url" env:"OAUTH2_PROXY_OIDC_ISSUER_URL"`
 	SkipOIDCDiscovery bool   `flag:"skip-oidc-discovery" cfg:"skip_oidc_discovery" env:"OAUTH2_SKIP_OIDC_DISCOVERY"`
-	OIDCJwksURL       string `flag:"oidc-jwks-url" cfg:"oidc_jwks_url" env:"OAUTH2_OIDC_JWKS_URL"`
-	LoginURL          string `flag:"login-url" cfg:"login_url" env:"OAUTH2_PROXY_LOGIN_URL"`
-	RedeemURL         string `flag:"redeem-url" cfg:"redeem_url" env:"OAUTH2_PROXY_REDEEM_URL"`
-	ProfileURL        string `flag:"profile-url" cfg:"profile_url" env:"OAUTH2_PROXY_PROFILE_URL"`
-	ProtectedResource string `flag:"resource" cfg:"resource" env:"OAUTH2_PROXY_RESOURCE"`
-	ValidateURL       string `flag:"validate-url" cfg:"validate_url" env:"OAUTH2_PROXY_VALIDATE_URL"`
-	Scope             string `flag:"scope" cfg:"scope" env:"OAUTH2_PROXY_SCOPE"`
 	ApprovalPrompt    string `flag:"approval-prompt" cfg:"approval_prompt" env:"OAUTH2_PROXY_APPROVAL_PROMPT"`
 
 	// Configuration values for logging
@@ -113,7 +120,7 @@ type Options struct {
 	redirectURL   *url.URL
 	proxyURLs     []*url.URL
 	CompiledRegex []*regexp.Regexp
-	provider      providers.Provider
+	provider      []providers.Provider
 	sessionStore  sessionsapi.SessionStore
 	signatureData *SignatureData
 	oidcVerifier  *oidc.IDTokenVerifier
@@ -192,55 +199,58 @@ func (o *Options) Validate() error {
 	if o.CookieSecret == "" {
 		msgs = append(msgs, "missing setting: cookie-secret")
 	}
-	if o.ClientID == "" {
+	if len(o.Clients) == 0 {
 		msgs = append(msgs, "missing setting: client-id")
 	}
-	// login.gov uses a signed JWT to authenticate, not a client-secret
-	if o.ClientSecret == "" && o.Provider != "login.gov" {
-		msgs = append(msgs, "missing setting: client-secret")
-	}
+	//// login.gov uses a signed JWT to authenticate, not a client-secret
+	//if o.ClientSecret == "" && o.Provider != "login.gov" {
+	//	msgs = append(msgs, "missing setting: client-secret")
+	//}
 	if o.AuthenticatedEmailsFile == "" && len(o.EmailDomains) == 0 && o.HtpasswdFile == "" {
 		msgs = append(msgs, "missing setting for email validation: email-domain or authenticated-emails-file required."+
 			"\n      use email-domain=* to authorize all email addresses")
 	}
 
-	if o.OIDCIssuerURL != "" {
+	for _, c := range o.Clients {
+		if c.OIDCIssuerURL != "" {
 
-		ctx := context.Background()
+			ctx := context.Background()
 
-		// Construct a manual IDTokenVerifier from issuer URL & JWKS URI
-		// instead of metadata discovery if we enable -skip-oidc-discovery.
-		// In this case we need to make sure the required endpoints for
-		// the provider are configured.
-		if o.SkipOIDCDiscovery {
-			if o.LoginURL == "" {
-				msgs = append(msgs, "missing setting: login-url")
-			}
-			if o.RedeemURL == "" {
-				msgs = append(msgs, "missing setting: redeem-url")
-			}
-			if o.OIDCJwksURL == "" {
-				msgs = append(msgs, "missing setting: oidc-jwks-url")
-			}
-			keySet := oidc.NewRemoteKeySet(ctx, o.OIDCJwksURL)
-			o.oidcVerifier = oidc.NewVerifier(o.OIDCIssuerURL, keySet, &oidc.Config{
-				ClientID: o.ClientID,
-			})
-		} else {
-			// Configure discoverable provider data.
-			provider, err := oidc.NewProvider(ctx, o.OIDCIssuerURL)
-			if err != nil {
-				return err
-			}
-			o.oidcVerifier = provider.Verifier(&oidc.Config{
-				ClientID: o.ClientID,
-			})
+			// Construct a manual IDTokenVerifier from issuer URL & JWKS URI
+			// instead of metadata discovery if we enable -skip-oidc-discovery.
+			// In this case we need to make sure the required endpoints for
+			// the provider are configured.
+			if o.SkipOIDCDiscovery {
+				//if o.LoginURL == "" {
+				//	msgs = append(msgs, "missing setting: login-url")
+				//}
+				//if o.RedeemURL == "" {
+				//	msgs = append(msgs, "missing setting: redeem-url")
+				//}
+				//if o.OIDCJwksURL == "" {
+				//	msgs = append(msgs, "missing setting: oidc-jwks-url")
+				//}
+				//keySet := oidc.NewRemoteKeySet(ctx, o.OIDCJwksURL)
+				//o.oidcVerifier = oidc.NewVerifier(o.OIDCIssuerURL, keySet, &oidc.Config{
+				//	ClientID: o.ClientID,
+				//})
+			} else {
 
-			o.LoginURL = provider.Endpoint().AuthURL
-			o.RedeemURL = provider.Endpoint().TokenURL
-		}
-		if o.Scope == "" {
-			o.Scope = "openid email profile"
+				// Configure discoverable provider data.
+				provider, err := oidc.NewProvider(ctx, c.OIDCIssuerURL)
+				if err != nil {
+					return err
+				}
+				o.oidcVerifier = provider.Verifier(&oidc.Config{
+					ClientID: c.ClientID,
+				})
+
+				c.LoginURL = provider.Endpoint().AuthURL
+				c.RedeemURL = provider.Endpoint().TokenURL
+			}
+			if c.Scope == "" {
+				c.Scope = "openid email profile"
+			}
 		}
 	}
 
@@ -340,71 +350,92 @@ func (o *Options) Validate() error {
 }
 
 func parseProviderInfo(o *Options, msgs []string) []string {
-	p := &providers.ProviderData{
-		Scope:          o.Scope,
-		ClientID:       o.ClientID,
-		ClientSecret:   o.ClientSecret,
-		ApprovalPrompt: o.ApprovalPrompt,
-	}
-	p.LoginURL, msgs = parseURL(o.LoginURL, "login", msgs)
-	p.RedeemURL, msgs = parseURL(o.RedeemURL, "redeem", msgs)
-	p.ProfileURL, msgs = parseURL(o.ProfileURL, "profile", msgs)
-	p.ValidateURL, msgs = parseURL(o.ValidateURL, "validate", msgs)
-	p.ProtectedResource, msgs = parseURL(o.ProtectedResource, "resource", msgs)
 
-	o.provider = providers.New(o.Provider, p)
-	switch p := o.provider.(type) {
-	case *providers.AzureProvider:
-		p.Configure(o.AzureTenant)
-	case *providers.GitHubProvider:
-		p.SetOrgTeam(o.GitHubOrg, o.GitHubTeam)
-	case *providers.GoogleProvider:
-		if o.GoogleServiceAccountJSON != "" {
-			file, err := os.Open(o.GoogleServiceAccountJSON)
-			if err != nil {
-				msgs = append(msgs, "invalid Google credentials file: "+o.GoogleServiceAccountJSON)
-			} else {
-				p.SetGroupRestriction(o.GoogleGroups, o.GoogleAdminEmail, file)
-			}
-		}
-	case *providers.OIDCProvider:
-		if o.oidcVerifier == nil {
-			msgs = append(msgs, "oidc provider requires an oidc issuer URL")
-		} else {
-			p.Verifier = o.oidcVerifier
-		}
-	case *providers.LoginGovProvider:
-		p.AcrValues = o.AcrValues
-		p.PubJWKURL, msgs = parseURL(o.PubJWKURL, "pubjwk", msgs)
+	provs := make([]*providers.ProviderInput, 0)
 
-		// JWT key can be supplied via env variable or file in the filesystem, but not both.
-		switch {
-		case o.JWTKey != "" && o.JWTKeyFile != "":
-			msgs = append(msgs, "cannot set both jwt-key and jwt-key-file options")
-		case o.JWTKey == "" && o.JWTKeyFile == "":
-			msgs = append(msgs, "login.gov provider requires a private key for signing JWTs")
-		case o.JWTKey != "":
-			// The JWT Key is in the commandline argument
-			signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(o.JWTKey))
-			if err != nil {
-				msgs = append(msgs, "could not parse RSA Private Key PEM")
-			} else {
-				p.JWTKey = signKey
+	for _, c := range o.Clients {
+
+		p := &providers.ProviderData{
+			Scope:          c.Scope,
+			ClientID:       c.ClientID,
+			ClientSecret:   c.ClientSecret,
+			ApprovalPrompt: o.ApprovalPrompt,
+		}
+		p.LoginURL, msgs = parseURL(c.LoginURL, "login", msgs)
+		p.RedeemURL, msgs = parseURL(c.RedeemURL, "redeem", msgs)
+		p.ProfileURL, msgs = parseURL(c.ProfileURL, "profile", msgs)
+		p.ValidateURL, msgs = parseURL(c.ValidateURL, "validate", msgs)
+		p.ProtectedResource, msgs = parseURL(c.ProtectedResource, "resource", msgs)
+
+		pIn := &providers.ProviderInput{
+			ProviderName:c.Provider,
+			P:p,
+		}
+
+		provs = append(provs, pIn)
+	}
+
+
+	for _, p := range provs {
+		o.provider = append(o.provider, providers.New(*p))
+	}
+
+	for _, pr := range o.provider {
+		switch p := pr.(type) {
+		case *providers.AzureProvider:
+			p.Configure(o.AzureTenant)
+		case *providers.GitHubProvider:
+			p.SetOrgTeam(o.GitHubOrg, o.GitHubTeam)
+		case *providers.GoogleProvider:
+			if o.GoogleServiceAccountJSON != "" {
+				file, err := os.Open(o.GoogleServiceAccountJSON)
+				if err != nil {
+					msgs = append(msgs, "invalid Google credentials file: "+o.GoogleServiceAccountJSON)
+				} else {
+					p.SetGroupRestriction(o.GoogleGroups, o.GoogleAdminEmail, file)
+				}
 			}
-		case o.JWTKeyFile != "":
-			// The JWT key is in the filesystem
-			keyData, err := ioutil.ReadFile(o.JWTKeyFile)
-			if err != nil {
-				msgs = append(msgs, "could not read key file: "+o.JWTKeyFile)
-			}
-			signKey, err := jwt.ParseRSAPrivateKeyFromPEM(keyData)
-			if err != nil {
-				msgs = append(msgs, "could not parse private key from PEM file:"+o.JWTKeyFile)
+		case *providers.OIDCProvider:
+			if o.oidcVerifier == nil {
+				msgs = append(msgs, "oidc provider requires an oidc issuer URL")
 			} else {
-				p.JWTKey = signKey
+				p.Verifier = o.oidcVerifier
+			}
+		case *providers.LoginGovProvider:
+			p.AcrValues = o.AcrValues
+			p.PubJWKURL, msgs = parseURL(o.PubJWKURL, "pubjwk", msgs)
+
+			// JWT key can be supplied via env variable or file in the filesystem, but not both.
+			switch {
+			case o.JWTKey != "" && o.JWTKeyFile != "":
+				msgs = append(msgs, "cannot set both jwt-key and jwt-key-file options")
+			case o.JWTKey == "" && o.JWTKeyFile == "":
+				msgs = append(msgs, "login.gov provider requires a private key for signing JWTs")
+			case o.JWTKey != "":
+				// The JWT Key is in the commandline argument
+				signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(o.JWTKey))
+				if err != nil {
+					msgs = append(msgs, "could not parse RSA Private Key PEM")
+				} else {
+					p.JWTKey = signKey
+				}
+			case o.JWTKeyFile != "":
+				// The JWT key is in the filesystem
+				keyData, err := ioutil.ReadFile(o.JWTKeyFile)
+				if err != nil {
+					msgs = append(msgs, "could not read key file: "+o.JWTKeyFile)
+				}
+				signKey, err := jwt.ParseRSAPrivateKeyFromPEM(keyData)
+				if err != nil {
+					msgs = append(msgs, "could not parse private key from PEM file:"+o.JWTKeyFile)
+				} else {
+					p.JWTKey = signKey
+				}
 			}
 		}
 	}
+
+
 	return msgs
 }
 
